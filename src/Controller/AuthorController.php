@@ -22,15 +22,39 @@ final class AuthorController extends AbstractController
     //     ]);
     // }
     // 4) Afficher la liste des auteurs
-    #[Route('/', name: 'app_author_index')]
-    public function index(AuthorRepository $repo): Response
-    {
-        $authors = $repo->findAll();
+    //v1.0
+    // #[Route('/', name: 'app_author_index')]
+    // public function index(AuthorRepository $repo): Response
+    // {
+    //     $authors = $repo->findAll();
 
-        return $this->render('author/index.html.twig', [
-            'authors' => $authors,
-        ]);
+    //     return $this->render('author/index.html.twig', [
+    //         'authors' => $authors,
+    //     ]);
+    // }
+    //v2.0
+    #[Route('/', name: 'app_author_index')]
+public function index(Request $request, AuthorRepository $repo): Response
+{
+    $minBooks = $request->query->get('minBooks');
+    $maxBooks = $request->query->get('maxBooks');
+    
+    // Si des critères de recherche sont fournis
+    if ($minBooks !== null || $maxBooks !== null) {
+        $authors = $repo->findAuthorsByBookRange(
+            $minBooks ? (int)$minBooks : null,
+            $maxBooks ? (int)$maxBooks : null
+        );
+    } else {
+        $authors = $repo->findAll();
     }
+    
+    return $this->render('author/index.html.twig', [
+        'authors' => $authors,
+        'minBooks' => $minBooks,
+        'maxBooks' => $maxBooks,
+    ]);
+}
 
     // 5) Ajouter un auteur statique
     #[Route('/add-static', name: 'app_author_add_static')]
@@ -114,4 +138,13 @@ final class AuthorController extends AbstractController
 
         return $this->redirectToRoute('app_author_index');
     }
+    #[Route('/delete-empty', name: 'app_author_delete_empty')]
+public function deleteEmpty(AuthorRepository $repo): Response
+{
+    $deletedCount = $repo->deleteAuthorsWithNoBooks();
+    
+    $this->addFlash('success', "$deletedCount auteur(s) sans livre(s) supprimé(s).");
+    
+    return $this->redirectToRoute('app_author_index');
+}
 }

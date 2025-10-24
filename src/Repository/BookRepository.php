@@ -15,6 +15,25 @@ class BookRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Book::class);
     }
+    public function countRomanceBooks(): int
+    {
+        return $this->createQueryBuilder('b')
+            ->select('COUNT(b.id)')
+            ->andWhere('b.category = :category')
+            ->setParameter('category', 'Romance')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+    public function findBooksByDateRange(\DateTime $startDate, \DateTime $endDate): array
+    {
+        return $this->createQueryBuilder('b')
+            ->andWhere('b.publicationDate BETWEEN :startDate AND :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->orderBy('b.publicationDate', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
     //    /**
     //     * @return Book[] Returns an array of Book objects

@@ -3,41 +3,105 @@
 {% block title %}Liste des auteurs{% endblock %}
 
 {% block body %}
-<h1>Liste des auteurs</h1>
+<div class="container mt-4">
+    <h1>Liste des auteurs</h1>
 
-<p>
-  <a href="{{ path('app_author_new') }}">Ajouter un auteur (formulaire)</a> |
-  <a href="{{ path('app_author_add_static') }}">Ajouter auteur statique</a>
-</p>
+    <p>
+        <a href="{{ path('app_author_new') }}" class="btn btn-success">Ajouter un auteur (formulaire)</a>
+        <a href="{{ path('app_author_add_static') }}" class="btn btn-info">Ajouter auteur statique</a>
+        <a href="{{ path('app_author_delete_empty') }}" class="btn btn-danger" 
+           onclick="return confirm('Supprimer tous les auteurs sans livres ?');">
+            Supprimer auteurs sans livres
+        </a>
+    </p>
 
-<table border="1" cellpadding="6">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Nom</th>
-      <th>Email</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for author in authors %}
-      <tr>
-        <td>{{ author.id }}</td>
-        <td>{{ author.username }}</td>
-        <td>{{ author.email }}</td>
-        <td>
-          <a href="{{ path('app_author_edit', {id: author.id}) }}">edit</a>
+    {# FORMULAIRE DE RECHERCHE - AJOUTÉ ICI #}
+    <div class="search-form mb-4">
+        <h3>Rechercher par nombre de livres</h3>
+        <form method="get" action="{{ path('app_author_index') }}" class="row g-3">
+            <div class="col-md-4">
+                <label for="minBooks" class="form-label">Nombre minimum de livres</label>
+                <input type="number" class="form-control" id="minBooks" name="minBooks" 
+                       value="{{ minBooks }}" min="0" placeholder="Ex: 0">
+            </div>
+            <div class="col-md-4">
+                <label for="maxBooks" class="form-label">Nombre maximum de livres</label>
+                <input type="number" class="form-control" id="maxBooks" name="maxBooks" 
+                       value="{{ maxBooks }}" min="0" placeholder="Ex: 10">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Rechercher
+                </button>
+                <a href="{{ path('app_author_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
 
-          {# Formulaire de suppression (POST) avec token CSRF #}
-          <form method="post" action="{{ path('app_author_delete', {id: author.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer cet auteur ?');">
-            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
-            <button type="submit">delete</button>
-          </form>
-        </td>
-      </tr>
-    {% else %}
-      <tr><td colspan="4">Aucun auteur trouvé.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    {# MESSAGE SI RECHERCHE ACTIVE #}
+    {% if minBooks is not null or maxBooks is not null %}
+        <div class="alert alert-info">
+            Résultats filtrés : 
+            {% if minBooks is not null %}minimum {{ minBooks }} livre(s){% endif %}
+            {% if minBooks is not null and maxBooks is not null %} et {% endif %}
+            {% if maxBooks is not null %}maximum {{ maxBooks }} livre(s){% endif %}
+        </div>
+    {% endif %}
+
+    {# TABLEAU DES AUTEURS #}
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Nombre de livres</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for author in authors %}
+                <tr>
+                    <td>{{ author.id }}</td>
+                    <td>{{ author.username }}</td>
+                    <td>{{ author.email }}</td>
+                    <td>
+                        <span class="badge bg-primary">{{ author.nbBooks }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ path('app_author_edit', {id: author.id}) }}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+
+                        {# Formulaire de suppression (POST) avec token CSRF #}
+                        <form method="post" action="{{ path('app_author_delete', {id: author.id}) }}" 
+                              style="display:inline" 
+                              onsubmit="return confirm('Supprimer cet auteur ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        {% if minBooks is not null or maxBooks is not null %}
+                            Aucun auteur trouvé avec ces critères de recherche.
+                        {% else %}
+                            Aucun auteur trouvé.
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="text-muted">
+        <strong>Total :</strong> {{ authors|length }} auteur(s) affiché(s)
+    </p>
+</div>
 {% endblock %}

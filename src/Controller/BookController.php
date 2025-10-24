@@ -124,4 +124,27 @@ final class BookController extends AbstractController
             'book' => $book,
         ]);
     }
+    #[Route('/romance-count', name: 'app_book_romance_count')]
+    public function romanceCount(BookRepository $bookRepository): Response
+    {
+        $count = $bookRepository->countRomanceBooks();
+
+        return $this->render('book/romance_count.html.twig', [
+            'count' => $count,
+        ]);
+    }
+    #[Route('/by-date-range', name: 'app_book_by_date_range')]
+    public function booksByDateRange(BookRepository $bookRepository): Response
+    {
+        $startDate = new \DateTime('2014-01-01');
+        $endDate = new \DateTime('2018-12-31');
+
+        $books = $bookRepository->findBooksByDateRange($startDate, $endDate);
+
+        return $this->render('book/by_date_range.html.twig', [
+            'books' => $books,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+    }
 }
