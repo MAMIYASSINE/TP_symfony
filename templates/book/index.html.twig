@@ -1,0 +1,30 @@
+<h1>Liste des livres publiés</h1>
+
+<p>Livres publiés : {{ nbPublished }} | Livres non publiés : {{ nbNotPublished }}</p>
+
+<a href="{{ path('app_book_new') }}">➕ Ajouter un livre</a>
+
+{% if books is empty %}
+    <p><strong>No Books found</strong></p>
+{% else %}
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Titre</th>
+            <th>Auteur</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author.username }}</td>
+                <td>{{ book.publicationDate|date('Y-m-d') }}</td>
+                <td>
+                    <a href="{{ path('app_book_show', {id: book.id}) }}">show</a> |
+                    <a href="{{ path('app_book_edit', {id: book.id}) }}">edit</a> |
+                    <a href="{{ path('app_book_delete', {id: book.id}) }}">delete</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}

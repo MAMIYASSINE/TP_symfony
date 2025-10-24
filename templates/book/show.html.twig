@@ -1,0 +1,8 @@
+<h1>Détails du livre</h1>
+
+<p><strong>Titre :</strong> {{ book.title }}</p>
+<p><strong>Date de publication :</strong> {{ book.publicationDate|date('Y-m-d') }}</p>
+<p><strong>Auteur :</strong> {{ book.author.username }}</p>
+<p><strong>Publié :</strong> {{ book.enabled ? 'Oui' : 'Non' }}</p>
+
+<a href="{{ path('app_book_index') }}">⬅ Retour à la liste</a>

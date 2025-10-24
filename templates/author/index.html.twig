@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des auteurs{% endblock %}
+
+{% block body %}
+<h1>Liste des auteurs</h1>
+
+<p>
+  <a href="{{ path('app_author_new') }}">Ajouter un auteur (formulaire)</a> |
+  <a href="{{ path('app_author_add_static') }}">Ajouter auteur statique</a>
+</p>
+
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nom</th>
+      <th>Email</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for author in authors %}
+      <tr>
+        <td>{{ author.id }}</td>
+        <td>{{ author.username }}</td>
+        <td>{{ author.email }}</td>
+        <td>
+          <a href="{{ path('app_author_edit', {id: author.id}) }}">edit</a>
+
+          {# Formulaire de suppression (POST) avec token CSRF #}
+          <form method="post" action="{{ path('app_author_delete', {id: author.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer cet auteur ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
+            <button type="submit">delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4">Aucun auteur trouvé.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
